@@ -17,7 +17,7 @@ router.post('/post',verify,(req,res) => {
             });
             try{
                 const post = newpost.save();
-                return res.json(newpost._id);
+                return res.json("postId:"+newpost._id);
             }
             catch(err )
             {
@@ -28,13 +28,15 @@ router.post('/post',verify,(req,res) => {
 
     router.post('/:postId/comment',async (req,res) => {
         const postt =await post.findOne({_id:req.params.postId}).populate('comments');
-        const newcomment = new comment ({
-            commentBody: req.body.commentBody,
-            postId: postt._id
+        const newcomment = new comment();
+            newcomment.commentBody = req.body.commentBody;
+            newcomment.postId = postt._id;
             
-        });
-        newcomment.save();
-        return res.send(newcomment._id)
+        
+        await newcomment.save();
+       await postt.comment.push(comment._id);
+        await postt.save();
+        return res.send(newcomment);
     });
 
     router.put('/:postId/update',async (req,res) => {
@@ -56,5 +58,12 @@ router.post('/post',verify,(req,res) => {
         });              
 
     });
+    router.get('/:postId/comments',(req,res) => {
+         const  comment = comment.findById()
+    });
+    router.get('/posts',async (req,res) => {
+        const allpost =await post.find({});
+        res.send(allpost);
+    })
 
 module.exports = router;
