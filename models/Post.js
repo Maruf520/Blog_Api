@@ -6,6 +6,10 @@ const postSchema = new mongoose.Schema({
         required: true,
         
     },
+    comments:{
+        commentId:String,
+        commentBody:String,
+},
     postTitle:{
         type:String,
         required:true,
