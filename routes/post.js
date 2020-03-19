@@ -5,6 +5,7 @@ const {PostValidation,PosteditValidation} = require('../validation');
 const verify = require('./verifyToken');
 
 
+
 router.post('/post',verify,(req,res) => {
             
             const{error} = PostValidation(req.body);
@@ -27,16 +28,27 @@ router.post('/post',verify,(req,res) => {
     });
 
     router.post('/:postId/comment',async (req,res) => {
-        const postt =await post.findOne({_id:req.params.postId}).populate('comments');
+        const postt = await post.findOne({_id:req.params.postId});
+        console.log(postt);
         const newcomment = new comment();
             newcomment.commentBody = req.body.commentBody;
             newcomment.postId = postt._id;
-            
-        
-        await newcomment.save();
-       await postt.comment.push(comment._id);
-        await postt.save();
-        return res.send(newcomment);
+
+                await newcomment.save();
+                console.log("commentId: "+newcomment._id+"  "+"PostId: "+newcomment.postId);
+                const ddd = newcomment._id;
+
+                var obj = [{
+                    'commentId': newcomment._id,
+                    'commentBody':newcomment.commentBody,
+                }];
+                // var obj =  {
+                //     commmentId : newcomment._id,
+                //     commentBody: newcomment.commentBody
+                // }
+               postt.comments.push(obj);
+                await postt.save();
+                return res.send(newcomment);
     });
 
     router.put('/:postId/update',async (req,res) => {
@@ -48,7 +60,6 @@ router.post('/post',verify,(req,res) => {
         const p = post.findById({_id});
         console.log(p);
          post.findById({_id})
-            //console.log(postt),
         .then(postt => {
         postt.postBody = req.body.postBody,
         postt.save()
@@ -58,11 +69,26 @@ router.post('/post',verify,(req,res) => {
         });              
 
     });
+
+    router.post('/:postId/delete',async (req,res) => {
+        const dltpost =await post.findById({_id:req.params.postId});
+
+        if(dltpost)
+        {
+           await post.findByIdAndDelete({_id:req.params.postId});
+            res.send('deleted');
+        }
+        else
+        {
+            res.status(400).json({message:"post not found"});
+        }
+
+    });
     router.get('/:postId/comments',(req,res) => {
          const  comment = comment.findById()
     });
     router.get('/posts',async (req,res) => {
-        const allpost =await post.find({});
+        const allpost = await post.find({});
         res.send(allpost);
     })
 
